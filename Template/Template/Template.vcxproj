@@ -149,6 +149,7 @@
     <ClInclude Include="Chapter23.h" />
     <ClInclude Include="Chapter25.h" />
     <ClInclude Include="Chapter3.h" />
+    <ClInclude Include="Chapter4.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
