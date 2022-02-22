@@ -143,6 +143,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Chapter1.h" />
     <ClInclude Include="Chapter21.h" />
     <ClInclude Include="Chapter23.h" />
     <ClInclude Include="Chapter25.h" />
