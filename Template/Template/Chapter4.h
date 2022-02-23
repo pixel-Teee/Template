@@ -209,7 +209,7 @@ namespace Note4dot4dot5 {
 		using CustomerOP = Overloader<CustomerHash, CustomerEq>;
 
 		std::unordered_set<Customer, CustomerHash, CustomerEq> coll1;
-		std::unordered_set<Customer, CustomerOP, CustomerOP> coll1;
+		//std::unordered_set<Customer, CustomerOP, CustomerOP> coll1;
 	}
 }
 
