@@ -302,9 +302,93 @@ namespace std{
 
 
 
+# Template Template Parameters
+
+模板的模板参数。
 
 
 
+模板参数可以是一个类模板。
+
+
+
+为了使用一个容器类型，**int需要描述两次。**
+
+
+
+```c++
+Stack<int, std::vector<int>> vStack;
+```
+
+
+
+使用模板模板参数，std::vector的类型不需要再次描述。
+
+
+
+![image-20220223190703060](../Images/5.7.png)
+
+
+
+两个改动，默认模板类型参数，从std::deque&lt;T&gt;变成std::deque，T实例化了模板模板参数。
+
+
+
+可以使用类模板里面的一个类型**去实例化一个模板模板类型。**
+
+
+
+由于模板模板参数的模板参数没有被用到，习惯上就忽略掉。
+
+![image-20220223192142936](../Images/5.7.1.png)
+
+
+
+这样做了后，成员函数也需要**改动成一致的**。
+
+```c++
+template<typename T, template<typename> class Cont>
+void Stack<T, Cont>::push(T const& elem)
+{
+	elems.push_back(elem);
+}
+```
+
+
+
+## Template Template Argument Matching
+
+
+
+在C++17之前，带入模板模板的argument必须是一个带参数的模板，精确地匹配要替换的模板模板parameter。
+
+![image-20220223193124787](../Images/5.7.2.png)
+
+如果现在使用这个，会发现std::deque和模板模板参数Cont不兼容。
+
+
+
+模板模板parameter的默认值没有被考虑，因此通过留下一个有默认值的参数是不能达到匹配的。
+
+C++17，默认参数被考虑。
+
+
+
+C++17之前的问题是由于std::deque模板有超过一个的值。
+
+第二个参数allocator有一个默认值，但是在C++17之前，当匹配std::deque到Cont的时候，这个不会被考虑。
+
+
+
+![image-20220223193745650](../Images/5.7.3.png)
+
+现在就精确地匹配了。
+
+
+
+**Cont现在有两个模板参数，而std::deque也有两个模板参数。**
+
+Alloc的名字可以忽略，如果没有用到。
 
 
 
