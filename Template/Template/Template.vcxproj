@@ -144,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Chapter1.h" />
+    <ClInclude Include="Chapter10.h" />
     <ClInclude Include="Chapter2.h" />
     <ClInclude Include="Chapter21.h" />
     <ClInclude Include="Chapter23.h" />
