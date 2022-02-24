@@ -180,7 +180,7 @@ namespace Note6dot4 {
 			C(C const volatile&) = delete;
 
 		template<typename U, typename = std::enable_if_t<!std::integral<U>::value>>
-		C(<U> const&) {
+		C(U const&) {
 			std::cout << "tmpl copy constructor\n";
 		}
 	};
