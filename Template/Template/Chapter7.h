@@ -81,7 +81,7 @@ namespace Note7dot3 {
 
 namespace Note7dot4 {
 	template<typename T, std::size_t L1, std::size_t L2>
-	void foo(T(&arg)[L1], T(&arg2)[L2])
+	void foo(T(&arg1)[L1], T(&arg2)[L2])
 	{
 		T* pa = arg1;//decay arg1
 		T* pb = arg2;//decay arg2

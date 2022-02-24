@@ -8,6 +8,7 @@
 #include "Chapter5.h"
 #include "Chapter6.h"
 #include "Chapter7.h"
+#include "Chapter8.h"
 #include "Chapter21.h"
 #include "Chapter23.h"
 #include "Chapter25.h"
@@ -21,5 +22,6 @@ int main()
 	Chapter5::M_Test();
 	Chapter6::M_Test();
 	Chapter7::M_Test();
+	Chapter8::M_Test();
 	return 0;
 }
