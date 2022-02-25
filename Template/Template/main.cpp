@@ -9,9 +9,10 @@
 #include "Chapter6.h"
 #include "Chapter7.h"
 #include "Chapter8.h"
-#include "Chapter18.h"
 #include "Chapter10.h"
 #include "Chapter11.h"
+#include "Chapter18.h"
+#include "Chapter19.h"
 #include "Chapter21.h"
 #include "Chapter23.h"
 #include "Chapter25.h"
@@ -29,5 +30,6 @@ int main()
 	Chapter10::M_Test();
 	Chapter11::M_Test();
 	Chapter18::M_Test();
+	Chapter19::M_Test();
 	return 0;
 }
