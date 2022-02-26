@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <utility>
+#include <type_traits>
 
 namespace Note19dot1dot1 {
 	template<typename T>
@@ -689,15 +690,420 @@ namespace Note19dot4dot3 {
 	}
 }
 
+namespace Note19dot4dot4 {
+
+	/*template<typename T1, typename T2>
+	struct PlusResultT {
+		using Type = decltype(std::declval<T1>() + std::declval<T2>());
+	};
+
+	template<typename T1, typename T2>
+	using PlusResult = typename PlusResultT<T1, T2>::Type;*/
+
+	//primary template
+	template<typename, typename, typename = std::void_t<>>
+	struct HasPlusT : std::false_type
+	{
+
+	};
+
+	//partial specialization(may be SFINAE)
+	template<typename T1, typename T2>
+	struct HasPlusT<T1, T2, std::void_t<decltype(std::declval<T1>() + std::declval<T2>())>> : std::false_type
+	{
+
+	};
+
+	template<typename T1, typename T2, bool = HasPlusT<T1, T2>::value>
+	struct PlusResultT {
+		using Type = decltype(std::declval<T1>() + std::declval<T2>());
+	};
+
+	template<typename T1, typename T2>
+	struct PlusResultT<T1, T2, false> {
+
+	};
+
+	/*template<typename T>
+	struct Array {
+
+	};*/
+
+	/*template<typename C, bool = HasMemberT_value_type<C>::value>
+	struct ElementT {
+		using Type = typename C::value_type;
+	};
+
+	template<typename C>
+	struct ElementT<C, false> {
+
+	};*/
+
+	//template<typename T1, typename T2>
+	//Array<typename PlusResultT<T1, T2>::Type>
+	//operator + (Array<T1> const&, Array<T2>& const&);
+
+	////overload
+	//Array<A> operator+(Array<A> const& arrayA, Array<B> const& arrayB);
+
+	void test7() {
+		
+	}
+}
+
+namespace Note19dot5 {
+
+	/*template<typename FROM, typename TO, bool = IsVoidT<TO>::Value ||
+										IsValidT<TO>::Value ||
+										IsFunctionT<TO>::Value>
+		struct IsConvertibleHelper {
+		using Type = std::integral_constant<bool,
+											IsVoidT<TO>::Type
+											&& IsVoidT<FROM>::value>;
+		;*/
+
+	template<typename FROM, typename TO>
+	struct IsConvertibleHelper{
+		private:
+			static void aux(TO);
+
+			//
+			template<typename F, typename = decltype(aux(std::declval<F>()))>
+			static std::true_type test(void*);
+
+			//fallback
+			template<typename>
+			static std::false_type test(...);
+		public:
+			
+			//test return type is true_type or false_type
+			//true_type or false_type have member value
+			using Type = decltype(test<FROM>(nullptr));
+	};
+
+	template<typename FROM, typename TO>
+	struct IsConvertibleT : IsConvertibleHelper<FROM, TO>::Type {
+
+	};
+
+	void test11() {
+		std::cout << IsConvertibleT<int, int>::value << std::endl;
+		std::cout << IsConvertibleT<int, std::string>::value << std::endl;
+		std::cout << IsConvertibleT<char const*, std::string>::value << std::endl;
+		std::cout << IsConvertibleT<std::string, char const*>::value << std::endl;
+	}
+}
+
+namespace Note19dot6 {
+	using namespace Note19dot3dot2;
+	//helper to ignore any number of template parameters
+	template<typename...> using VoidT = void;
+
+	//primary template
+	template<typename, typename = VoidT<>>
+	struct HasSizeTypeT : std::false_type
+	{
+
+	};
+
+	//partial specialization
+	//may be SFINAE away
+	template<typename T>
+	struct HasSizeTypeT<T, VoidT<typename RemoveReferenceT<T>::Type>> : std::true_type
+	{
+
+	};
+
+	struct CX {
+		using size_type = std::size_t;
+	};
+
+	void test8() {
+		std::cout << HasSizeTypeT<int>::value << std::endl;
+		
+		std::cout << HasSizeTypeT<CX>::value << std::endl;
+	}
+}
+
+namespace Note19dot6dot2 {
+	#define DEFINE_HAS_TYPE(MemType)				\
+	template<typename, typename = std::void_t<>>	\
+	struct HasTypeT_##MemType						\
+	: std::false_type{};							\
+	template<typename T>							\
+	struct HasTypeT_##MemType<T, std::void_t<typename T::MemType>> \
+	: std::true_type{};
+
+	DEFINE_HAS_TYPE(value_type);
+	DEFINE_HAS_TYPE(char_type);
+
+	#define DEFINE_HAS_MEMBER(Member) \
+	template<typename, typename = std::void_t<>> \
+	struct HasMemberT_##Member					\
+	: std::false_type{};\
+	template<typename T>\
+	struct HasMemberT_##Member<T, std::void_t<decltype(&T::Member)>> \
+	: std::true_type{};
+
+	DEFINE_HAS_MEMBER(size);
+	DEFINE_HAS_MEMBER(first);
+
+	//Detecting Member Functions
+
+	//primary template:
+	template<typename, typename = std::void_t<>>
+	struct HasBeginT : std::false_type {
+
+	};
+
+	//partial specialization(may be SFINAE'd away)
+	template<typename T>
+	struct HasBeginT<T, std::void_t<decltype(std::declval<T>().begin())>>
+	:std::true_type {
+
+	};
+
+	//primary template:
+	template<typename, typename, typename = std::void_t<>>
+	struct HasLessT : std::false_type
+	{
+
+	};
+
+	//partial specialization
+	template<typename T1, typename T2>
+	struct HasLessT<T1, T2, std::void_t<decltype(std::declval<T1>() < std::declval<T2>())>>
+	: std::true_type
+	{
+
+	};
+
+	//primary template:
+	template<typename, typename = std::void_t<>>
+	struct HasVariousT : std::false_type
+	{
+
+	};
+
+	//partial specialization
+	template<typename T>
+	struct HasVariousT<T, std::void_t<decltype(std::declval<T>().begin()),
+		typename T::difference_type,
+		typename T::iterator>>
+		: std::true_type
+	{
+
+	};
+
+	void test9() {
+		std::cout << "int::value_type: "
+					<< HasTypeT_value_type<int>::value << '\n';
+
+		std::cout << "std::vector<int>::value_type: "
+					<< HasTypeT_value_type<std::vector<int>>::value << '\n';
+
+		std::cout << "int::size: "
+					<< HasMemberT_size<int>::value << '\n';
+
+		std::cout << "std::vector<int>::size: "
+					<< HasMemberT_size<std::vector<int>>::value << '\n';
+	}
+
+	using namespace Note19dot4dot3;
+
+	void test10() {
+		/*constexpr auto hasFirst 
+		= isValid([](auto x)-> decltype((void)valueT(x).first){});*/
+
+		constexpr auto hasSizeType
+		= isValid([](auto x)->typename decltype(valueT(x))::size_type{});
+
+		struct CX {
+			using size_type = std::size_t;
+		};
+
+		std::cout << "hasSizeType: " << hasSizeType(type<CX>) << '\n';
+
+		if constexpr (!hasSizeType(type<int>)) {
+			std::cout << "int has no size_type\n";
+		}
+
+		//define to check for < 
+		constexpr auto hasLess
+		= isValid([](auto x, auto y)-> decltype(valueT(x) < valueT(y)){});
+
+		std::cout << hasLess(42, type<char>) << std::endl;//yields true
+
+		//std::cout << "hasFirst: " << hasFirst(type<std::pair<int, int>>) << '\n';
+	}
+}
+
+namespace Note19dot7 {
+	//If-Then-Else
+
+	//if cond is true, return second type, else return third type
+	template<bool COND, typename TrueType, typename FalseType>
+	struct IfThenElseT {
+		using Type = TrueType;
+	};
+
+	//partial specialization: false yields third argument
+	template<typename TrueType, typename FalseType>
+	struct IfThenElseT<false, TrueType, FalseType>
+	{
+		using Type = FalseType;
+	};
+
+	template<bool COND, typename TrueType, typename FalseType>
+	using IfThenElse = typename IfThenElseT<COND, TrueType, FalseType>::Type;
+
+	template<auto N>
+	struct SmallestIntT {
+		using Type = 
+			typename IfThenElseT<N <= std::numeric_limits<char>::max(), char,
+				typename IfThenElseT<N <= std::numeric_limits<short>::max(), short,
+					typename IfThenElseT<N <= std::numeric_limits<int>::max(), int,
+						typename IfThenElseT<N <= std::numeric_limits<long>::max(), long,
+							typename IfThenElseT<N <= std::numeric_limits<long long>::max(),
+							long long,
+							void
+							>::Type
+						>::Type
+					>::Type
+				>::Type
+			>::Type;
+	};
+
+	//yield T when using member Type:
+	template<typename T>
+	struct IdentityT {
+		using Type = T;
+	};
+
+	//to make unsigned after IfThenElse was evaluated:
+	template<typename T>
+	struct MakeUnsignedT {
+		using Type = typename std::make_unsigned<T>::type;
+	};
+
+	template<typename T>
+	struct UnsignedT {
+		using Type = typename IfThenElse<std::is_integral<T>::value
+								&& !std::is_same<T, bool>::value,
+								MakeUnsignedT<T>,
+								IdentityT<T>>::Type;
+	};
+
+	void test12() {
+		//SmallestIntT<156161561616165>::Type q;
+		//std::cout << typeid(q).name() << std::endl;
+
+		UnsignedT<int>::Type a = 4U;
+		std::cout << a << std::endl;
+	}
+}
+
+namespace Note19dot7dot2 {
+	/*template<typename T>
+	struct IsNothrowMoveConstructibleT
+		:std::bool_constant<noexcept(T(std::declval<T>()))>
+	{
+
+	};*/
+
+	//primary template
+	template<typename T, typename = std::void_t<>>
+	struct IsNothrowMoveConstructibleT : std::false_type
+	{
+
+	};
+
+	//partial specialization
+	template<typename T>
+	struct IsNothrowMoveConstructibleT<T, std::void_t<decltype(T(std::declval<T>()))>>
+		: std::bool_constant<noexcept(T(std::declval<T>()))>
+	{
+
+	};
+}
+
+namespace Note19dot8 {
+	
+	//primary template: in general T is not a fundamental type
+	template<typename T>
+	struct IsFundaT : std::false_type {
+
+	};
+
+	//marco to specializa for fundamental types
+	#define MK_FUNDA_TYPE(T)		\
+		template<> struct IsFundaT<T> : std::true_type{ \
+		};\
+
+	MK_FUNDA_TYPE(void)
+	MK_FUNDA_TYPE(bool)
+
+	MK_FUNDA_TYPE(signed char)
+	MK_FUNDA_TYPE(unsigned char)
+
+	MK_FUNDA_TYPE(wchar_t)
+	MK_FUNDA_TYPE(char16_t)
+	MK_FUNDA_TYPE(char32_t)
+
+	MK_FUNDA_TYPE(signed short)
+	MK_FUNDA_TYPE(unsigned short)
+	MK_FUNDA_TYPE(signed int)
+	MK_FUNDA_TYPE(unsigned int)
+	MK_FUNDA_TYPE(signed long)
+	MK_FUNDA_TYPE(unsigned long)
+	MK_FUNDA_TYPE(signed long long)
+	MK_FUNDA_TYPE(unsigned long long)
+
+	MK_FUNDA_TYPE(float)
+	MK_FUNDA_TYPE(double)
+	MK_FUNDA_TYPE(long double)
+
+	MK_FUNDA_TYPE(std::nullptr_t)
+
+	template<typename T>
+	void test(T const&)
+	{
+		if (IsFundaT<T>::value)
+		{
+			std::cout << "T is a fundamental type" << '\n';
+		}
+		else
+		{
+			std::cout << "T is not a fundamental type" << '\n';
+		}
+	}
+
+	void test13() {
+		test(7);
+		test("hello");
+	}
+}
+
 namespace Chapter19 {
-	using namespace Note19dot2;
+	/*using namespace Note19dot2;
 	using namespace Note19dot3;
 	using namespace Note19dot3dot2;
-	using namespace Note19dot4;
+	using namespace Note19dot4;*/
+	using namespace Note19dot5;
+	using namespace Note19dot6;
+	using namespace Note19dot6dot2;
+	using namespace Note19dot7;
+	using namespace Note19dot8;
 	void M_Test() {
-		test2();
+		/*test2();
 		test3();
 		test4();
-		test6();
+		test6();*/
+		test7();
+		test8();
+		test9();
+		test10();
+		test12();
+		test13();
 	}
 }
