@@ -1218,7 +1218,7 @@ namespace Note19dot8do2 {
 		using Type = Array<T> const&;
 	};*/
 
-	template<typename T>
+	/*template<typename T>
 	struct RParam {
 		using Type
 		= IfThenElse<(sizeof(T) <= 2 * sizeof(void*)
@@ -1226,7 +1226,7 @@ namespace Note19dot8do2 {
 					&& std::is_trivially_move_constructible<T>::value)
 					T,
 					T const&>;
-	};
+	};*/
 
 	class MyClass1{
 		public:
