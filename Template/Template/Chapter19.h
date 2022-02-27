@@ -1084,6 +1084,200 @@ namespace Note19dot8 {
 	}
 }
 
+namespace Note19dot8do2 {
+	using namespace Note19dot7;
+	using namespace Note19dot8;
+	//pointers
+	template<typename T>
+	struct IsPointerT : std::false_type {
+
+	};
+
+	template<typename T>
+	struct IsPointerT<T*> : std::true_type {
+		using BaseT = T;
+	};
+
+	//references
+	template<typename T>
+	struct IsLValueReferenceT : std::false_type {
+
+	};
+
+	template<typename T>
+	struct IsLValueReferenceT<T&> : std::true_type {
+		using BaseT = T;
+	};
+
+	//rvalue reference
+	template<typename T>
+	struct IsRValueReferenceT : std::false_type {
+
+	};
+
+	template<typename T>
+	struct IsRValueReferenceT<T&&> : std::true_type {
+		using BaseT = T;
+	};
+
+	template<typename T>
+	class IsReferenceT : public IfThenElseT<
+						IsLValueReferenceT<T>::value,
+						IsLValueReferenceT<T>,
+						IsRValueReferenceT<T>
+	>::Type {
+
+	};
+
+	//arrays
+	template<typename T>
+	struct IsArrayT : std::false_type { //primary template
+
+	};
+
+	template<typename T, std::size_t N> //partial specialization for arrays
+	struct IsArrayT<T[N]> : std::true_type {
+		using BaseT = T;
+		static constexpr std::size_t size = N;
+	};
+
+	template<typename T>
+	struct IsArrayT<T[]> : std::false_type {//unbound arrays
+		using BaseT = T;
+		static constexpr std::size_t size = 0;
+	};
+
+	//pointer to members
+	template<typename T>
+	struct IsPointerToMemberT : std::false_type {
+
+	};
+
+	//C: class name
+	//partial specialization
+	template<typename T, typename C>
+	struct IsPointerToMemberT<T C::*>: std::true_type {
+		using MemberT = T;
+		using ClassT = C;
+	};
+
+	//identifying function types
+	template<typename T>
+	struct IsFunctionT : std::false_type { //primary template: no function
+
+	};
+
+	template<typename R, typename... Params>
+	struct IsFunctionT<R(Params...)> : std::true_type {
+		using Type = R;
+		//using ParamsT = Typelist<Params...>;
+		static constexpr bool variadic = false;
+	};
+
+	template<typename R, typename... Params>
+	struct IsFunctionT<R(Params..., ...)> : std::true_type {
+		using Type = R;
+		//using ParamsT = Typelist<Params...>;
+		static constexpr bool variadic = true;
+	};
+
+	//determining class types
+	template<typename T, typename = std::void_t<>>
+	struct IsClassT : std::false_type {
+		//primary template
+	};
+
+	template<typename T>
+	struct IsClassT<T, std::void_t<int T::*>> //calsses can have pointer-to-member
+	: std::true_type {
+
+	};
+
+	//determining enumeration types
+	template<typename T>
+	struct IsEnumT {
+		static constexpr bool value = !IsFundaT<T>::value &&
+									!IsPointerT<T>::value &&
+									!IsReferenceT<T>::value &&
+									!IsArrayT<T>::value &&
+									!IsPointerT<T>::value &&
+									!IsFunctionT<T>::value &&
+									!IsClassT<T>::value;
+	};
+
+	template<typename T>
+	struct RParam {
+		using Type = typename IfThenElse<sizeof(T) <= 2 * sizeof(void*),
+										T,
+										T const&>::Type;
+	};
+
+	/*template<typename T>
+	struct RParam<Array<T>>
+	{
+		using Type = Array<T> const&;
+	};*/
+
+	template<typename T>
+	struct RParam {
+		using Type
+		= IfThenElse<(sizeof(T) <= 2 * sizeof(void*)
+					&& std::is_trivially_copy_constructible<T>::value
+					&& std::is_trivially_move_constructible<T>::value)
+					T,
+					T const&>;
+	};
+
+	class MyClass1{
+		public:
+			MyClass1() {
+
+			}
+			MyClass1(MyClass1 const&) {
+				std::cout << "MyClass1 copy constructor called\n";
+			}
+	};
+
+	class MyClass2 {
+		public:
+			MyClass2() {
+
+			}
+			MyClass2(MyClass2 const&) {
+				std::cout << "MyClass2 copy constructor called\n";
+			}
+	};
+
+	//pass MyClass2 objects with RParam<> by value
+	template<>
+	class RParam<MyClass2> {
+		public:
+			using Type = MyClass2;
+	};
+
+	////function that allows parameter passing by value or by reference
+	//template<typename T1, typename T2>
+	//void foo(typename RParam<T1>::Type p1,
+	//	typename RParam<T2>::Type p2)
+	//{
+	//	//...
+	//}
+
+	template<typename T1, typename T2>
+	void foo_core(typename RParam<T1>::Type p1,
+		typename RParam<T2>::Type p2)
+	{
+
+	}
+
+	//wrapper to avoid explicit template parameter passing
+	template<typename T1, typename T2>
+	void foo(T1&& p1, T2&& p2)
+	{
+		foo_core<T1, T2>(std::forward<T1>(p1), std::forward<T2>(p2));
+	}
+}
+
 namespace Chapter19 {
 	/*using namespace Note19dot2;
 	using namespace Note19dot3;

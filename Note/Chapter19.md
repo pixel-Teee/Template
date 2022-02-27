@@ -1061,6 +1061,192 @@ template<> struct IsFundaT<bool> : std::true_type{
 
 C++标准库定义了一些类型目录，更加地细粒度。
 
+# Determining Compound Types
+
+决定复合的类型。
+
+
+
+简单的复合类型可以被分类，使用部分特例化。
+
+
+
+![image-20220227092132956](../Images/19.8.3.png)
+
+比如指针，标准库里面有个std::is_pointer<>。
+
+
+
+![image-20220227092929150](../Images/19.8.4.png)
+
+标准库有std::is_lvalue_reference<>和std::is_rvalue_reference<>，还有std::is_reference<>。
+
+
+
+![image-20220227093556222](../Images/19.8.5.png)
+
+数组类型如上。
+
+
+
+std::is_array<>检查是否是数组，std::rank<>和std::extent<>**允许我们访问它们维度的数量和确切维度的大小。**
+
+
+
+# Pointers to Members
+
+![image-20220227094229253](../Images/19.8.6.png)
+
+C++标准库提供了确切的trait，std::is_member_object_pointer<>和std::is_member_function_pointer<>。
+
+
+
+# Identifying Function Types
+
+![image-20220227095138118](../Images/19.8.7.png)
+
+variadic表示是否使用C风格的varargs。
+
+
+
+但是函数还有const、volatile、noexcept修饰符，还需要大量的部分特例化版本。
+
+
+
+C++标准库提供了std::is_function<> trait。
+
+
+
+# Determining Class Types
+
+
+
+不像其它复合类型，我们没有部分特例化一样，匹配所有的类类型。
+
+一个有用的方法，就是只有类类型可以**被用来作为指向成员指针的类型。**
+
+![image-20220227095926910](../Images/19.8.8.png)
+
+
+
+C++标准库有std::is_class<>和std::is_union<>类型。
+
+
+
+C++语言描述lambda表达式是一个独一无二的，无名的非联合类类型。
+
+
+
+**C++标准库提供traits，std::is_class<>和std::is_union<>。**
+
+
+
+# Determining Enumeration Types
+
+决定枚举类型，就是排除其它的类型。
+
+![image-20220227102119879](../Images/19.8.9.png)
+
+C++标准库提供std::is_enum<>类型。
+
+
+
+# Policy Traits
+
+
+
+之前的都叫做property traits。
+
+
+
+相反的，一些traits定义一些trait如何被对待。
+
+我们叫这个为policy traits。
+
+
+
+策略trait封装了策略在成员函数里面。
+
+
+
+## Read-Only Parameter Types
+
+![image-20220227104024984](../Images/19.8.10.png)
+
+比如我们可以根据类型的大小，使用传值还是传引用，大小不超过两个指针的，就使用传值。
+
+
+
+但是数组类型，它们本身可能很小，本身持有一个指针，我们需要部分特例化。
+
+
+
+**这里的类模板就是类型函数。**
+
+
+
+![image-20220227104610972](../Images/19.9.1.png)
+
+由于vector、array这样的类型非常的普遍，因此，只标记一些类型可以平凡地拷贝和移动。
+
+
+
+![image-20220227110223795](../Images/19.9.2.png)
+
+函数foo不能够使用模板参数推导，因为模板参数只出现函数参数里面。需要显式指明模板参数。
+
+
+
+正确的解决方式如下：
+
+![image-20220227110858271](../Images/19.9.3.png)
+
+
+
+# In the Standard Library
+
+
+
+C++标准库定义了一些policy和property traits：
+
+1.类模板std::char_traits被用来作为一个policy traits参数，通过string和I/O stream类。
+
+
+
+2.适应算法被用来不同的标准迭代器上，一个简单的std::iterator_traits属性trait模板被提供。
+
+
+
+3.std::numeric_limits非常有用，作为一个属性trait模板。
+
+
+
+4.对于标准容器的内存分配类，使用策略trait类。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
