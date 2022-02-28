@@ -15,6 +15,7 @@
 #include "Chapter19.h"
 #include "Chapter20.h"
 #include "Chapter21.h"
+#include "Chapter22.h"
 #include "Chapter23.h"
 #include "Chapter25.h"
 
@@ -34,5 +35,6 @@ int main()
 	Chapter19::M_Test();
 	Chapter20::M_Test();
 	Chapter21::M_Test();
+	Chapter22::M_Test();
 	return 0;
 }

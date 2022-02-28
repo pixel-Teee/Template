@@ -489,14 +489,14 @@ namespace Note21dot3 {
 }
 
 namespace Note21dot3dot1 {
-	template<typename... Mixins>
+	/*template<template<typename>... Mixins>
 	class Point : public Mixins<Point>...
 	{
 	public:
 		double x, y;
 		Point() : Mixins<Point>()..., x(0.0), y(0.0){}
 		Point(double x, double y) : Mixins<Point>()..., x(x), y(y){}
-	};
+	};*/
 }
 
 namespace Note21dot3dot2 {
