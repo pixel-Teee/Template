@@ -193,7 +193,7 @@ namespace Note22dot2 {
 			template<typename U>
 			static std::true_type test(
 				decltype(conv(std::declval<U const&>() == std::declval<U const&>())),
-				decltype(conv(!(std::declval<U const&>() == std::declval<U const&>())));
+				decltype(conv(!(std::declval<U const&>() == std::declval<U const&>()))));
 
 			//fallback
 			template<typename U>
