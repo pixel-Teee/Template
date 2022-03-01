@@ -17,6 +17,7 @@
 #include "Chapter21.h"
 #include "Chapter22.h"
 #include "Chapter23.h"
+#include "Chapter24.h"
 #include "Chapter25.h"
 
 int main()
@@ -37,5 +38,6 @@ int main()
 	Chapter21::M_Test();
 	Chapter22::M_Test();
 	Chapter23::M_Test();
+	Chapter24::M_Test();
 	return 0;
 }
