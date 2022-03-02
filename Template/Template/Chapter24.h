@@ -449,17 +449,24 @@ namespace Note24dot3 {
 		using Type = CTValue<T, Head>;
 		static constexpr T value = Head;
 	};
+	*/
+	template<typename ValueList>
+	struct PopFrontT;
 
 	template<typename T, T Head, T... Tail>
 	struct PopFrontT<Valuelist<T, Head, Tail...>> {
 		using Type = Valuelist<T, Tail...>;
 	};
 
+	template<typename Valuelist, typename CTValue>
+	struct PushFrontT;
+
 	template<typename T, T... Values, T New>
 	struct PushFrontT<Valuelist<T, Values...>, CTValue<T, New>> {
 		using Type = Valuelist<T, New, Values...>;
 	};
 
+	/*
 	template<typename T, T... Values, T New>
 	struct PushBackT<Valuelist<T, Values...>, CTValue<T, New>> {
 		using Type = Valuelist<T, Values..., New>;

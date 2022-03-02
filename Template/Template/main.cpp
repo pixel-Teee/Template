@@ -39,5 +39,6 @@ int main()
 	Chapter22::M_Test();
 	Chapter23::M_Test();
 	Chapter24::M_Test();
+	Chapter25::M_Test();
 	return 0;
 }
