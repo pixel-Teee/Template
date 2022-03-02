@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include "Chapter19.h"
 
 namespace Note24dot1 {
@@ -402,10 +404,168 @@ namespace Note24dot2dot7 {
 	}
 }
 
+namespace Note24dot3 {
+	using namespace Note24dot2dot2;
+	using namespace Note24dot2dot4;
+
+	template<typename T, T Value>
+	struct CTValue
+	{
+		static constexpr T value = Value;
+	};
+
+	template<typename T, typename U>
+	struct MultiplyT;
+
+	template<typename T, T Value1, T Value2>
+	struct MultiplyT<CTValue<T, Value1>, CTValue<T, Value2>> {
+		public:
+			using Type = CTValue<T, Value1 * Value2>;
+	};
+
+	template<typename T, typename U>
+	using Multiply = typename MultiplyT<T, U>::Type;
+
+	void test2() {
+		using Primes = Typelist<CTValue<int, 2>, CTValue<int, 3>,
+						CTValue<int, 5>, CTValue<int, 7>,
+						CTValue<int, 11>>;
+
+		std::cout << Accumulate<Primes, MultiplyT, CTValue<int, 1>>::value;
+	}
+
+	template<typename T, T... Values>
+	struct Valuelist {
+
+	};
+
+	/*template<typename T, T... Values>
+	struct IsEmpty<Valuelist<T, Values...>> {
+		static constexpr bool value = sizeof...(Values) == 0;
+	};
+
+	template<typename T, T Head, T... Tail>
+	struct FrontT<Valuelist<T, Head, Tail...>> {
+		using Type = CTValue<T, Head>;
+		static constexpr T value = Head;
+	};
+
+	template<typename T, T Head, T... Tail>
+	struct PopFrontT<Valuelist<T, Head, Tail...>> {
+		using Type = Valuelist<T, Tail...>;
+	};
+
+	template<typename T, T... Values, T New>
+	struct PushFrontT<Valuelist<T, Values...>, CTValue<T, New>> {
+		using Type = Valuelist<T, New, Values...>;
+	};
+
+	template<typename T, T... Values, T New>
+	struct PushBackT<Valuelist<T, Values...>, CTValue<T, New>> {
+		using Type = Valuelist<T, Values..., New>;
+	};*/
+}
+
+namespace Note24dot4 {
+	using namespace Note24dot2dot4;
+	using namespace Note24dot3;
+	template<typename... Elements, template<typename T> class MetaFun>
+	class TransformT<Typelist<Elements...>, MetaFun, false>
+	{
+		public:
+			using Type = Typelist<typename MetaFun<Elements>::Type...>;
+	};
+
+	template<typename Types, typename Indices>
+	class SelectT;
+
+	template<typename Types, unsigned... Indices>
+	class SelectT<Types, Valuelist<unsigned, Indices...>>
+	{
+		public:
+			using Type = Typelist<NthElement<Types, Indices>...>;
+	};
+
+	template<typename Types, typename Indices>
+	using Select = typename SelectT<Types, Indices>::Type;
+}
+
+namespace Note24dot5 {
+	//using namespace Note24dot2dot7;
+	class Nil{};//empty class
+
+	template<typename HeadT, typename TailT = Nil>
+	class Cons {
+		public:
+			using Head = HeadT;
+			using Tail = TailT;
+	};
+
+	using TwoShort = Cons<short, Cons<unsigned short>>;
+
+	//extract the first element
+	template<typename List>
+	class FrontT {
+		public:
+			using Type = typename List::Head;
+	};
+
+	template<typename List>
+	using Front = typename FrontT<List>::Type;
+
+	template<typename List, typename Element>
+	class PushFrontT {
+		public:
+			using Type = Cons<Element, List>;
+	};
+
+	template<typename List, typename Element>
+	using PushFront = typename PushFrontT<List, Element>::Type;
+
+	//removing first element
+	template<typename List>
+	class PopFrontT {
+		public:
+			using Type = typename List::Tail;
+	};
+
+	template<typename List>
+	using PopFront = typename PopFrontT<List>::Type;
+
+	template<typename List>
+	struct IsEmpty
+	{
+		static constexpr bool value = false;
+	};
+
+	template<>
+	struct IsEmpty<Nil> {
+		static constexpr bool value = true;
+	};
+
+	template<typename T, typename U>
+	struct SmallerThanT {
+		static constexpr bool value = sizeof(T) < sizeof(U);
+	};
+
+	void test4() {
+		/*using ConsList = Cons<int, Cons<char, Cons<short, Cons<double>>>>;
+
+		using SortedTypes = Note24dot2dot7::InsertionSort<ConsList, SmallerThanT>;
+		using Expected = Cons<char, Cons<short, Cons<int, Cons<double>>>>;
+
+		std::cout << std::is_same<SortedTypes, Expected>::value << '\n';*/
+	}
+}
+
 namespace Chapter24 {
 	using namespace Note24dot2dot7;
-
+	using namespace Note24dot3;
+	using namespace Note24dot5;
 	void M_Test() {
 		test();
+		test2();
+		//test3();
+		test4();
 	}
 }
